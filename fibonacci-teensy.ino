@@ -29,10 +29,9 @@ IRrecv irReceiver(IR_RECV_PIN);
 
 #define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
 
-#define DATA_PIN    A5
-#define CLK_PIN     A3
+#define DATA_PIN    0
 // #define COLOR_ORDER RGB
-#define LED_TYPE    WS2801
+#define LED_TYPE    WS2811
 #define NUM_LEDS    100
 
 #define NUM_VIRTUAL_LEDS 101
@@ -134,7 +133,7 @@ CRGBPalette16 targetPalette = palettes[paletteIndex];
 
 void setup()
 {
-  FastLED.addLeds<LED_TYPE, DATA_PIN, CLK_PIN>(leds, NUM_LEDS);
+  FastLED.addLeds<LED_TYPE, DATA_PIN>(leds, NUM_LEDS);
   FastLED.setCorrection(Typical8mmPixel);
   FastLED.setBrightness(brightness);
   FastLED.setDither(false);
