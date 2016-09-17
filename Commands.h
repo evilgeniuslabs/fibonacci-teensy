@@ -16,9 +16,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef IrCodes_H
-#define IrCodes_H
-
 enum class InputCommand {
     None,
     Up,
@@ -537,5 +534,3 @@ InputCommand readCommand() {
 InputCommand readCommand(unsigned int holdDelay) {
     return getCommand(readIRCode(holdDelay));
 }
-
-#endif
