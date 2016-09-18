@@ -40,46 +40,6 @@ IRrecv irReceiver(IR_RECV_PIN);
 
 CRGB leds[NUM_VIRTUAL_LEDS];
 
-typedef uint8_t (*SimplePattern)();
-typedef SimplePattern SimplePatternList[];
-
-// List of patterns to cycle through.  Each is defined as a separate function below.
-
-const SimplePatternList patterns = {
-  pride,
-  colorWaves,
-  rainbowTwinkles,
-  snowTwinkles,
-  cloudTwinkles,
-  incandescentTwinkles,
-  horizontalRainbow,
-  verticalRainbow,
-  diagonalRainbow,
-  noise,
-  yinYang,
-  radialPaletteShift,
-  verticalPaletteBlend,
-  horizontalPaletteBlend,
-  spiral1,
-  spiral2,
-  spiralPath1,
-  wave,
-  life,
-  pulse,
-  rainbow,
-  rainbowWithGlitter,
-  rainbowSolid,
-  confetti,
-  sinelon,
-  bpm,
-  juggle,
-  fire,
-  water,
-  showSolidColor,
-};
-
-int patternCount = ARRAY_SIZE(patterns);
-
 const uint8_t brightnessCount = 5;
 uint8_t brightnessMap[brightnessCount] = { 16, 32, 64, 128, 255 };
 uint8_t brightness = brightnessMap[0];
@@ -132,101 +92,6 @@ CRGBPalette16 targetPalette = palettes[paletteIndex];
 // 20-120 is better for deployment
 #define SECONDS_PER_PALETTE 20
 
-void setup()
-{
-  FastLED.addLeds<LED_TYPE, DATA_PIN, CLK_PIN>(leds, NUM_LEDS);
-  FastLED.setCorrection(Typical8mmPixel);
-  FastLED.setBrightness(brightness);
-  FastLED.setDither(false);
-  fill_solid(leds, NUM_LEDS, solidColor);
-  FastLED.show();
-
-  // Serial.begin(9600);
-
-  // Initialize the IR receiver
-  irReceiver.enableIRIn();
-  irReceiver.blink13(true);
-
-  loadSettings();
-
-  FastLED.setBrightness(brightness);
-  FastLED.setDither(brightness < 255);
-
-  noiseX = random16();
-  noiseY = random16();
-  noiseZ = random16();
-}
-
-void loop()
-{
-  // Add entropy to random number generator; we use a lot of it.
-  random16_add_entropy(random());
-
-  uint8_t requestedDelay = patterns[patternIndex]();
-
-  // send the 'leds' array out to the actual LED strip
-  FastLED.show();
-
-  handleInput(requestedDelay);
-
-  if (autoplayEnabled && millis() > autoPlayTimout) {
-    move(1);
-    autoPlayTimout = millis() + (autoPlayDurationSeconds * 1000);
-  }
-
-  // blend the current palette to the next
-  EVERY_N_MILLISECONDS(40) {
-    nblendPaletteTowardPalette(currentPalette, targetPalette, 16);
-  }
-
-  EVERY_N_MILLISECONDS( 40 ) {
-    gHue++;  // slowly cycle the "base color" through the rainbow
-  }
-
-  // slowly change to a new palette
-  EVERY_N_SECONDS(SECONDS_PER_PALETTE) {
-    paletteIndex++;
-    if (paletteIndex >= paletteCount) paletteIndex = 0;
-    targetPalette = palettes[paletteIndex];
-  };
-}
-
-void loadSettings() {
-  // load settings from EEPROM
-
-  // brightness
-  brightness = EEPROM.read(0);
-  if (brightness < 1)
-    brightness = 1;
-  else if (brightness > 255)
-    brightness = 255;
-
-  // patternIndex
-  patternIndex = EEPROM.read(1);
-  if (patternIndex < 0)
-    patternIndex = 0;
-  else if (patternIndex >= patternCount)
-    patternIndex = patternCount - 1;
-
-  // solidColor
-  solidColor.r = EEPROM.read(2);
-  solidColor.g = EEPROM.read(3);
-  solidColor.b = EEPROM.read(4);
-
-  if (solidColor.r == 0 && solidColor.g == 0 && solidColor.b == 0)
-    solidColor = CRGB::White;
-}
-
-void setSolidColor(CRGB color) {
-  solidColor = color;
-
-  EEPROM.write(2, solidColor.r);
-  EEPROM.write(3, solidColor.g);
-  EEPROM.write(4, solidColor.b);
-
-  moveTo(patternCount - 1);
-}
-
 void powerOff()
 {
   // clear the display
@@ -248,23 +113,6 @@ void powerOff()
     // go idle for a while, converve power
     delay(250);
   }
-}
-
-void move(int delta) {
-  moveTo(patternIndex + delta);
-}
-
-void moveTo(int index) {
-  patternIndex = index;
-
-  if (patternIndex >= patternCount)
-    patternIndex = 0;
-  else if (patternIndex < 0)
-    patternIndex = patternCount - 1;
-
-  fill_solid(leds, NUM_LEDS, CRGB::Black);
-
-  EEPROM.write(1, patternIndex);
 }
 
 int getBrightnessLevel() {
@@ -1541,5 +1389,157 @@ void setPixelDirection( uint16_t i, bool dir)
     value += orMask;
   }
   directionFlags[index] = value;
+}
+
+typedef uint8_t (*SimplePattern)();
+typedef SimplePattern SimplePatternList[];
+
+// List of patterns to cycle through.  Each is defined as a separate function below.
+
+const SimplePatternList patterns = {
+  pride,
+  colorWaves,
+  rainbowTwinkles,
+  snowTwinkles,
+  cloudTwinkles,
+  incandescentTwinkles,
+  horizontalRainbow,
+  verticalRainbow,
+  diagonalRainbow,
+  noise,
+  yinYang,
+  radialPaletteShift,
+  verticalPaletteBlend,
+  horizontalPaletteBlend,
+  spiral1,
+  spiral2,
+  spiralPath1,
+  wave,
+  life,
+  pulse,
+  rainbow,
+  rainbowWithGlitter,
+  rainbowSolid,
+  confetti,
+  sinelon,
+  bpm,
+  juggle,
+  fire,
+  water,
+  showSolidColor,
+};
+
+int patternCount = ARRAY_SIZE(patterns);
+
+void setup()
+{
+  FastLED.addLeds<LED_TYPE, DATA_PIN, CLK_PIN>(leds, NUM_LEDS);
+  FastLED.setCorrection(Typical8mmPixel);
+  FastLED.setBrightness(brightness);
+  FastLED.setDither(false);
+  fill_solid(leds, NUM_LEDS, solidColor);
+  FastLED.show();
+
+  // Serial.begin(9600);
+
+  // Initialize the IR receiver
+  irReceiver.enableIRIn();
+  irReceiver.blink13(true);
+
+  loadSettings();
+
+  FastLED.setBrightness(brightness);
+  FastLED.setDither(brightness < 255);
+
+  noiseX = random16();
+  noiseY = random16();
+  noiseZ = random16();
+}
+
+void loop()
+{
+  // Add entropy to random number generator; we use a lot of it.
+  random16_add_entropy(random());
+
+  uint8_t requestedDelay = patterns[patternIndex]();
+
+  // send the 'leds' array out to the actual LED strip
+  FastLED.show();
+
+  handleInput(requestedDelay);
+
+  if (autoplayEnabled && millis() > autoPlayTimout) {
+    move(1);
+    autoPlayTimout = millis() + (autoPlayDurationSeconds * 1000);
+  }
+
+  // blend the current palette to the next
+  EVERY_N_MILLISECONDS(40) {
+    nblendPaletteTowardPalette(currentPalette, targetPalette, 16);
+  }
+
+  EVERY_N_MILLISECONDS( 40 ) {
+    gHue++;  // slowly cycle the "base color" through the rainbow
+  }
+
+  // slowly change to a new palette
+  EVERY_N_SECONDS(SECONDS_PER_PALETTE) {
+    paletteIndex++;
+    if (paletteIndex >= paletteCount) paletteIndex = 0;
+    targetPalette = palettes[paletteIndex];
+  };
+}
+
+void loadSettings() {
+  // load settings from EEPROM
+
+  // brightness
+  brightness = EEPROM.read(0);
+  if (brightness < 1)
+    brightness = 1;
+  else if (brightness > 255)
+    brightness = 255;
+
+  // patternIndex
+  patternIndex = EEPROM.read(1);
+  if (patternIndex < 0)
+    patternIndex = 0;
+  else if (patternIndex >= patternCount)
+    patternIndex = patternCount - 1;
+
+  // solidColor
+  solidColor.r = EEPROM.read(2);
+  solidColor.g = EEPROM.read(3);
+  solidColor.b = EEPROM.read(4);
+
+  if (solidColor.r == 0 && solidColor.g == 0 && solidColor.b == 0)
+    solidColor = CRGB::White;
+}
+
+void setSolidColor(CRGB color) {
+  solidColor = color;
+
+  EEPROM.write(2, solidColor.r);
+  EEPROM.write(3, solidColor.g);
+  EEPROM.write(4, solidColor.b);
+
+  moveTo(patternCount - 1);
+}
+
+void move(int delta) {
+  moveTo(patternIndex + delta);
+}
+
+void moveTo(int index) {
+  patternIndex = index;
+
+  if (patternIndex >= patternCount)
+    patternIndex = 0;
+  else if (patternIndex < 0)
+    patternIndex = patternCount - 1;
+
+  fill_solid(leds, NUM_LEDS, CRGB::Black);
+
+  EEPROM.write(1, patternIndex);
 }
 
