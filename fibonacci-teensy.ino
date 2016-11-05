@@ -1,5 +1,5 @@
 /*
- * Fibonacci: https://github.com/evilgeniuslabs/fibonacci
+ * Fibonacci: https://github.com/evilgeniuslabs/fibonacci-teensy
  * Copyright (C) 2015 Jason Coon, Evil Genius Labs
  *
  * This program is free software: you can redistribute it and/or modify
