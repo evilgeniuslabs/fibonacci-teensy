@@ -1,6 +1,5 @@
 /*
- * React: https://github.com/evilgeniuslabs/react
- *
+ * Fibonacci: https://github.com/evilgeniuslabs/fibonacci-teensy
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,9 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef IrCodes_H
-#define IrCodes_H
 
 enum class InputCommand {
     None,
@@ -537,5 +533,3 @@ InputCommand readCommand() {
 InputCommand readCommand(unsigned int holdDelay) {
     return getCommand(readIRCode(holdDelay));
 }
-
-#endif
