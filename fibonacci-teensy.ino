@@ -1471,4 +1471,3 @@ void loop()
     nblendPaletteTowardPalette( gCurrentPalette, gTargetPalette, 16);
   }
 }
-
